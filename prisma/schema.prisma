@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Business {
+  id        String    @id @default(cuid())
+  name      String    @default("My Business")
+  email     String    @default("")
+  phone     String    @default("")
+  address   String    @default("")
+  city      String    @default("")
+  country   String    @default("")
+  currency  String    @default("USD")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  clients   Client[]
+  invoices  Invoice[]
+}
+
+model Client {
+  id         String    @id @default(cuid())
+  name       String
+  email      String
+  phone      String    @default("")
+  address    String    @default("")
+  city       String    @default("")
+  country    String    @default("")
+  businessId String
+  business   Business  @relation(fields: [businessId], references: [id])
+  invoices   Invoice[]
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model Invoice {
+  id         String        @id @default(cuid())
+  number     String        @unique
+  status     String        @default("DRAFT")
+  issueDate  DateTime      @default(now())
+  dueDate    DateTime
+  notes      String        @default("")
+  clientId   String
+  client     Client        @relation(fields: [clientId], references: [id])
+  businessId String
+  business   Business      @relation(fields: [businessId], references: [id])
+  items      InvoiceItem[]
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+}
+
+model InvoiceItem {
+  id          String  @id @default(cuid())
+  description String
+  quantity    Float
+  rate        Float
+  invoiceId   String
+  invoice     Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+}
